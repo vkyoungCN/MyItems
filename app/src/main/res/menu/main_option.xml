@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/item_show_by_loc"
+        android:title="@string/show_by_location" />
+    <item android:id="@+id/item_show_by_cat"
+        android:title="@string/show_by_category" />
+    <item android:id="@+id/loc_manage"
+        android:title="@string/loc_manage" />
+    <item android:id="@+id/cat_manage"
+        android:title="@string/cat_manage" />
+
+
+</menu>

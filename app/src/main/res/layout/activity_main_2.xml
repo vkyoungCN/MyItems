@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/m_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/colorPrimary"
+        android:titleTextColor="@color/fullyWhite"
+        android:subtitleTextColor="@color/fullyWhite"
+        android:elevation="4dp"
+
+        />    <!--android:theme="@style/ThemeOverlay.AppCompat.ActionBar" -->
+
+    <RelativeLayout
+        android:id="@+id/the_forgive_area"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:background="@color/colorPrimary">
+
+        <Button
+            android:id="@+id/debug_data_import"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/debug_data_import"
+            android:textSize="10sp"
+            android:visibility="gone"
+            />
+
+        <ImageView
+            android:id="@+id/robot_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"
+            android:src="@drawable/ic_android_white_64dp"
+
+            />
+        <TextView
+            android:id="@+id/item_total_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="6dp"
+            android:layout_marginStart="6dp"
+            android:textSize="13sp"
+            android:text="@string/current_total_items_num01"
+            android:textColor="@color/fullyWhite"/>
+
+        <TextView
+            android:id="@+id/location_total_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="6dp"
+            android:layout_marginEnd="6dp"
+            android:textSize="13sp"
+            android:text="@string/current_total_locations_num01"
+            android:textColor="@color/fullyWhite"/>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
+
+        <EditText
+            android:id="@+id/search_input"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="3"
+            android:background="#eafffb"
+            android:hint="@string/input_here"
+            android:textSize="17sp" />
+
+        <Button
+            android:id="@+id/search_go_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#AA11BBAA"
+            android:text="@string/search_go"
+            android:textColor="@color/fullyWhite"
+            android:textSize="20sp"/>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/item_result"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
+
+
+
+</LinearLayout>

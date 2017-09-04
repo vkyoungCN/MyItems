@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">MyItems</string>
+    <string name="show_by_category">按类别查看Items</string>
+    <string name="show_by_location">按位置查看Items</string>
+    <string name="show_all_items">查看已记录的所有物品</string>
+    <string name="search_items">查找物品</string>
+    <string name="input_here">在此输入要查找的物品名</string>
+    <string name="search_go">Go!</string>
+    <string name="manage_location">管理位置</string>
+    <string name="manage_category">管理类别</string>
+    <string name="current_total_items_num01">记录在册的Items数量：</string>
+    <string name="current_total_items_num02">件</string>
+    <string name="current_total_locations_num01">共有存放位置：</string>
+    <string name="current_total_locations_num02">处</string>
+    <string name="defaultTitle">缺省标题</string>
+    <string name="defaultDescription">Description Over Here.</string>
+    <string name="dropped">已丢弃</string>
+    <string name="simple">简洁</string>
+    <string name="loc_manage">位置管理</string>
+    <string name="cat_manage">类别管理</string>
+    <string name="debug_data_import">导入测试数据</string>
+    <string name="default_location_title">缺省位置</string>
+    <string name="next_location">下一层</string>
+    <string name="make_selection">选定</string>
+</resources>
