@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -12,7 +17,6 @@
         android:titleTextColor="@color/fullyWhite"
         android:subtitleTextColor="@color/fullyWhite"
         android:elevation="4dp"
-
         />    <!--android:theme="@style/ThemeOverlay.AppCompat.ActionBar" -->
 
     <RelativeLayout
@@ -87,7 +91,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#AA11BBAA"
+            android:background="@color/mc_buttonUse"
             android:text="@string/search_go"
             android:textColor="@color/fullyWhite"
             android:textSize="20sp"/>
@@ -104,3 +108,93 @@
 
 
 </LinearLayout>
+
+
+    <FrameLayout
+        android:id="@+id/frame_fab"
+        android:background="#88111111"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:translationZ="1dp"
+        android:onClick="fabsCollapse">
+
+    </FrameLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/main_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="4dp"
+        android:elevation="8dp"
+        android:src="@drawable/ic_add_white_36dp"
+        android:scaleType="center"
+        android:translationZ="2dp"
+        app:backgroundTint="#ffea00"
+        app:fabSize="normal" />
+    <TextView
+        android:id="@+id/tv_main_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@id/main_fab"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dp"
+        android:text="添加Item"
+        android:textColor="@color/fullyWhite"
+        android:translationZ="2dp"
+        android:visibility="gone"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/loc_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/main_fab"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="8dp"
+        android:elevation="4dp"
+        android:src="@drawable/ic_add_white_36dp"
+        android:translationZ="1dp"
+        app:backgroundTint="@android:color/holo_blue_dark"
+        app:fabSize="mini"
+        android:visibility="gone"
+        android:onClick="toNewLocation"/>
+    <TextView
+        android:id="@+id/tv_loc_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@id/loc_fab"
+        android:layout_alignBottom="@id/loc_fab"
+        android:text="新建位置"
+        android:textColor="@color/fullyWhite"
+        android:translationZ="2dp"
+        android:visibility="gone"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/cat_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/loc_fab"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="8dp"
+        android:elevation="4dp"
+        android:src="@drawable/ic_add_white_36dp"
+        app:backgroundTint="#ec407a"
+        app:fabSize="mini"
+        android:visibility="gone"
+        android:onClick="toNewCategory"/>
+    <TextView
+        android:id="@+id/tv_cat_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@id/cat_fab"
+        android:layout_alignBottom="@id/cat_fab"
+        android:text="新建分类"
+        android:textColor="@color/fullyWhite"
+        android:translationZ="2dp"
+        android:visibility="gone"/>
+
+</RelativeLayout>

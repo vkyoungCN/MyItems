@@ -226,7 +226,7 @@ public class MyItemsDbHelper extends SQLiteOpenHelper {
     * 另外的getAllItem()请求所有字段，开销略大不适合查数量。
     * */
     public int getItemTotalNum(){
-        //Log.i(TAG,"inside getItemTotalNum,before any calls,，now DB open ?"+String.valueOf(mSQLiteDatabase.isOpen()));
+        Log.i(TAG,"inside getItemTotalNum,before any calls,，now DB open ?"+String.valueOf(mSQLiteDatabase.isOpen()));
         getWDbIfClosedOrNull();
         String selectQuery = "SELECT " + MyItemsContract.ItemsMain._ID + " FROM " +
                 MyItemsContract.ItemsMain.TABLE_NAME;
@@ -328,10 +328,46 @@ public class MyItemsDbHelper extends SQLiteOpenHelper {
     }
 
     /*
+    * 按ID检索items
+    * */
+    public Item getItemsById(long id){
+        //Log.i(TAG,"inside getItemsById,now DB open ?"+String.valueOf(mSQLiteDatabase.isOpen()));
+        Item item = new Item();
+        String selectQuery = "SELECT * FROM " + MyItemsContract.ItemsMain.TABLE_NAME + " WHERE "
+                + MyItemsContract.ItemsMain._ID + " = " + id;
+        //Log.i(TAG,"inside getItemsById,before getReadableDatabase()");
+
+        getWDbIfClosedOrNull();
+        //Log.i(TAG,"inside getItemsById,before rawQuery, after getReadableDatabase()");
+        Cursor cursor = mSQLiteDatabase.rawQuery(selectQuery, null);
+
+        //Log.i(TAG,"inside getItemsById,after rawQuery, before Iterator");
+        //循环遍历，将所有row添加至list
+        if(cursor.moveToFirst()){
+            item.setId(cursor.getInt(cursor.getColumnIndex(MyItemsContract.ItemsMain._ID)));
+            item.setName(cursor.getString(cursor.getColumnIndex(MyItemsContract.ItemsMain.COLUMN_ITEM_NAME)));
+            item.setDescription(cursor.getString(cursor.getColumnIndex(MyItemsContract.ItemsMain.COLUMN_ITEM_Description)));
+            item.setDropStatus(cursor.getInt(cursor.getColumnIndex(MyItemsContract.ItemsMain.COLUMN_DROPPED)));
+            item.setLocationId(cursor.getInt(cursor.getColumnIndex(MyItemsContract.ItemsMain.COLUMN_LOCATIONID)));
+            item.setCategoryId(cursor.getInt(cursor.getColumnIndex(MyItemsContract.ItemsMain.COLUMN_CATEGORYID)));
+            //item.setLocationName(getLocationNameById(item.getLocationId()));
+            //item.setCategoryName(getCategoryNameById(item.getCategoryId()));
+            item.setMainImage(cursor.getString(cursor.getColumnIndex(MyItemsContract.ItemsMain.COLUMN_MAIN_IMAGE)));
+            //Log.i(TAG,"inside Iterator, Item: "+ item.toString()+" just loaded");
+            //Log.i(TAG,"inside Iterator, Item has mainPath: "+ item.getMainImage());
+        }
+        Log.i(TAG,"inside getItemsById, after load");
+        cursor.close();
+        closeDB();
+        return item;
+    }
+
+
+    /*
     * 按位置检索items；目前暂时接受LocationId作为参数；后期有可能可以直接接受位置名参数（需转为id）
     * */
-    public List<Item> getItemByLocation(long location_id){
-        Log.i(TAG,"inside getItemsByLocation,before any calls，now DB open ?"+String.valueOf(mSQLiteDatabase.isOpen()));
+    public List<Item> getItemsByLocationId(long location_id){
+        Log.i(TAG,"inside getItemsByLocationId,before any calls.");
         List<Item> items = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + MyItemsContract.ItemsMain.TABLE_NAME + " WHERE "
                 + MyItemsContract.ItemsMain.COLUMN_LOCATIONID + " = " + location_id;
@@ -367,8 +403,8 @@ public class MyItemsDbHelper extends SQLiteOpenHelper {
     /*
     * 按类别检索items
     * */
-    public List<Item> getItemByCategory(long category_id){
-        Log.i(TAG,"inside getItemByCategory,before any calls，now DB open ?"+String.valueOf(mSQLiteDatabase.isOpen()));
+    public List<Item> getItemsByCategoryId(long category_id){
+        Log.i(TAG,"inside getItemByCategory,before any calls");
         List<Item> items = new ArrayList<Item>();
         String selectQuery = "SELECT * FROM " + MyItemsContract.ItemsMain.TABLE_NAME + " WHERE "
                 + MyItemsContract.ItemsMain.COLUMN_CATEGORYID + " = " + category_id;
@@ -376,7 +412,7 @@ public class MyItemsDbHelper extends SQLiteOpenHelper {
         getWDbIfClosedOrNull();
         Cursor cursor = mSQLiteDatabase.rawQuery(selectQuery, null);
 
-        Log.i(TAG,"inside getItemByCategory,after rawQuery, before Iterator");
+        Log.i(TAG,"inside getItemsByCategoryId,after rawQuery, before Iterator");
         //循环遍历，将所有row添加至list
         if(cursor.moveToFirst()){
             do{
@@ -394,7 +430,7 @@ public class MyItemsDbHelper extends SQLiteOpenHelper {
                 items.add(item);
             }while (cursor.moveToNext());
         }
-        Log.i(TAG,"inside getItemByCategory, after Iterator");
+        Log.i(TAG,"inside getItemsByCategoryId, after Iterator");
         cursor.close();
         closeDB();
 
@@ -465,6 +501,24 @@ public class MyItemsDbHelper extends SQLiteOpenHelper {
         return locations;
     }
 
+    /*
+    * 检查是否有子位置元素
+    * */
+    public boolean hasChildLocation(long id){
+        //Log.i(TAG,"inside hasChildLocation,before any calls");
+        String selectQuery = "SELECT "+MyItemsContract.Locations._ID+" FROM " + MyItemsContract.Locations.TABLE_NAME + " WHERE "+
+                MyItemsContract.Locations.COLUMN_SUPER_LOCATION_ID + " = " + id;
+
+        getWDbIfClosedOrNull();
+        Cursor cursor = mSQLiteDatabase.rawQuery(selectQuery, null);
+        boolean result = cursor.getCount()!=0;
+        Log.i(TAG,"inside hasChildLocation, after cursor");
+
+        cursor.close();
+        closeDB();
+        return result;
+
+    }
 
     /*
     * 从category表检索全部类别
@@ -530,43 +584,83 @@ public class MyItemsDbHelper extends SQLiteOpenHelper {
     }
 
     /*
+    * 检查是否有子类别元素
+    * */
+    public boolean hasChildCategory(long id){
+        //Log.i(TAG,"inside hasChildCategory,before any calls");
+        String selectQuery = "SELECT "+MyItemsContract.Categories._ID+" FROM " + MyItemsContract.Categories.TABLE_NAME + " WHERE "+
+                MyItemsContract.Categories.COLUMN_SUPER_CAT_ID + " = " + id;
+
+        getWDbIfClosedOrNull();
+        Cursor cursor = mSQLiteDatabase.rawQuery(selectQuery, null);
+        boolean result = cursor.getCount()!=0;
+        Log.i(TAG,"inside hasChildCategory, after cursor");
+
+        cursor.close();
+        closeDB();
+        return result;
+
+    }
+
+    /*
     * 从位置ID转换为位置名称（单项转换）
     * */
-/*    public String getLocationNameById(long id){
+    public String getLocationNameById(long id){
         String selectQuery = "SELECT " + MyItemsContract.Locations.COLUMN_LOC_NAME + " FROM "
                 + MyItemsContract.Locations.TABLE_NAME + " WHERE "
                 + MyItemsContract.Locations._ID + " = " + id;
 
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
+        getWDbIfClosedOrNull();
+        Cursor cursor = mSQLiteDatabase.rawQuery(selectQuery, null);
 
         if(cursor !=null)
             cursor.moveToFirst();
-        return cursor.getString(cursor.getColumnIndex(MyItemsContract
-                .Locations.COLUMN_LOC_NAME));
+        String name = null;
+        try {
+            name = cursor.getString(cursor.getColumnIndex(MyItemsContract.Locations.COLUMN_LOC_NAME));
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        Log.i(TAG,"inside getLocationNameById, got the name");
+        try {
+            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        closeDB();
 
+        return name;
     }
-*/
+
     /*
     * 从类别ID转换为类别名称（单项转换）
     * */
-/*    public String getCategoryNameById(long id){
+    public String getCategoryNameById(long id){
         String selectQuery = "SELECT " + MyItemsContract.Categories.COLUMN_CAT_NAME + " FROM "
                 + MyItemsContract.Categories.TABLE_NAME + " WHERE "
                 + MyItemsContract.Categories._ID + " = " + id;
 
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
+        getWDbIfClosedOrNull();
+        Cursor cursor = mSQLiteDatabase.rawQuery(selectQuery, null);
 
         if(cursor !=null)
             cursor.moveToFirst();
-        return cursor.getString(cursor.getColumnIndex(MyItemsContract
+        String name = cursor.getString(cursor.getColumnIndex(MyItemsContract
                 .Categories.COLUMN_CAT_NAME));
+        Log.i(TAG,"inside getCategoryNameById, got the name");
+        try {
+            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        closeDB();
+
+        return name;
 
     }
 
 
-*/
+
     //以下是各update方法
     /*
     *更新一条Item记录的所有属性，对应单条item的详细修改业务。

@@ -26,17 +26,16 @@ public class ItemRecyclerViewFragment extends Fragment {
 
    @Override
     public void onCreate(Bundle savedInstanceState){
-        Log.i(TAG,"inside onCreate(), before any calls.");
+        //Log.i(TAG,"inside onCreate(), before any calls.");
         super.onCreate(savedInstanceState);
         items = getArguments().getParcelableArrayList(ITEM_RESULT);
-        Log.i(TAG,"inside Fragment onCreate(), got data(the items)");
-       //Log.i(TAG,"inside Fragment onCREATE, GOT THE ITEMS :"+items.toString());
+        //Log.i(TAG,"inside Fragment onCreate(), got data(the items)"+items.toString());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
-        Log.i(TAG,"inside onCreateView(), before any calls.");
+        //Log.i(TAG,"inside onCreateView(), before any calls.");
         View rootView = inflater.inflate(R.layout.item_result_rv_fragment, container, false);
         mRecyclerView = rootView.findViewById(R.id.recyclerView);
         mRecyclerView.setHasFixedSize(true);

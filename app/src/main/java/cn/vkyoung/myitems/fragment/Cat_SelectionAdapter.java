@@ -9,9 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
+
 import java.util.List;
 
 import cn.vkyoung.myitems.R;
+import cn.vkyoung.myitems.assistant.ActionType;
 import cn.vkyoung.myitems.sqlite.Category;
 import cn.vkyoung.myitems.sqlite.MyItemsDbHelper;
 
@@ -22,8 +25,11 @@ import cn.vkyoung.myitems.sqlite.MyItemsDbHelper;
 public class Cat_SelectionAdapter extends RecyclerView.Adapter<Cat_SelectionAdapter.ViewHolder> implements OnClickListener {
     private static final String TAG = "MyItems-RvAdp-CS";
     private List<Category> categories;
+    private SelectionDgFragment mSdFg;
+    private MyItemsDbHelper myItemsDbHelper;
     private RecyclerView mRv;
     private Context context;
+    private ActionType atp;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView title;
@@ -62,13 +68,20 @@ public class Cat_SelectionAdapter extends RecyclerView.Adapter<Cat_SelectionAdap
 
     /*
     * 初始化此Adapter的数据源
-    * */
+    *  减少错误概率，早期2参版本停用
     public Cat_SelectionAdapter(List<Category> categories, Context context){
         this.categories = categories;
         this.context = context;
+    }*/
 
+    //带Fragment引用才能将数据传回Fragment
+    public Cat_SelectionAdapter(List<Category> categories, Context context,SelectionDgFragment sdFg, ActionType atp){
+        this.categories = categories;
+        this.context = context;
+        this.mSdFg = sdFg;
+        this.myItemsDbHelper = MyItemsDbHelper.getInstance(context);
+        this.atp = atp;
     }
-
     //Create new views(由layout manager调用)
     @Override
     public Cat_SelectionAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType){
@@ -90,8 +103,13 @@ public class Cat_SelectionAdapter extends RecyclerView.Adapter<Cat_SelectionAdap
         viewHolder.getTitle().setText(category.getName());
         viewHolder.getDescription().setText(category.getDescription());
         //Log.i(TAG,"inside onBindViewHolder, ready to set the Listener");
-        viewHolder.getNextLevel().setOnClickListener(this);
-        Log.i(TAG, "inside onBindViewHolder, the Listener has been set");
+        if(myItemsDbHelper.hasChildCategory(category.getId())) {
+            viewHolder.getNextLevel().setOnClickListener(this);
+            Log.i(TAG, "inside onBindViewHolder, the Listener has been set");
+        }else {
+            viewHolder.getNextLevel().setVisibility(View.GONE);
+        }
+
         viewHolder.getMakeSelection().setOnClickListener(this);
 
     }
@@ -115,18 +133,23 @@ public class Cat_SelectionAdapter extends RecyclerView.Adapter<Cat_SelectionAdap
         switch (view.getId()){
             case R.id.next_level:
                 //Log.i(TAG,"inside RvAdapter's onClick, next_level branch");
-                List<Category> c = MyItemsDbHelper.getInstance(context).getCategoriesBySuperId(categories.get(viewPosition).getId());
-                SelectionDgFragment.CatSelectionBackStack.add(c);
-                Log.i(TAG,"inside RvAdapter's onClick, next_level branch, cat_id: "+categories.get(viewPosition).getId());
-                mRv.swapAdapter(new Cat_SelectionAdapter(c, context), true);
+                List<Category> c = myItemsDbHelper.getCategoriesBySuperId(categories.get(viewPosition).getId());
+                if(!c.isEmpty()) {
+                    SelectionDgFragment.CatSelectionBackStack.add(c);
+                    //Log.i(TAG,"inside RvAdapter's onClick, next_level branch, cat_id: "+categories.get(viewPosition).getId());
+                    mRv.swapAdapter(new Cat_SelectionAdapter(c, context,mSdFg, atp), true);
+                }else{
+                    Toast.makeText(context,"下一层没有数据了",Toast.LENGTH_SHORT).show();
+                }
                 break;
 
             case R.id.make_selection:
+                //Log.i(TAG,"inside onClick-make selection. "+locations.get(viewPosition).getName()+sdFg.toString());
+                mSdFg.onSingleSelectionMade(categories.get(viewPosition).getId(), atp);
                 break;
-
-
         }
     }
+
 
 
 

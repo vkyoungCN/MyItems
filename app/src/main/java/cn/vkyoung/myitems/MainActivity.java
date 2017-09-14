@@ -3,9 +3,10 @@ package cn.vkyoung.myitems;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -20,18 +21,18 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import 	android.support.design.widget.FloatingActionButton;
 
 import java.util.ArrayList;
 
+import cn.vkyoung.myitems.assistant.ActionType;
 import cn.vkyoung.myitems.assistant.ForgiveSize;
-import cn.vkyoung.myitems.assistant.SelectionType;
-import cn.vkyoung.myitems.fragment.Cat_SelectionAdapter;
 import cn.vkyoung.myitems.fragment.ItemRecyclerViewFragment;
 import cn.vkyoung.myitems.fragment.SelectionDgFragment;
 import cn.vkyoung.myitems.sqlite.Item;
 import cn.vkyoung.myitems.sqlite.MyItemsDbHelper;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SelectionDgFragment.OnDataPassOut {
 
     private static final String TAG = "MyItems-MainActivity";
     private static final String ITEM_RESULT = "item_search_result";
@@ -39,9 +40,12 @@ public class MainActivity extends AppCompatActivity {
     static ForgiveSize current_size_flag = ForgiveSize.LARGE;//初始状态
 
     private MyItemsDbHelper mDbHelper;
+    private DialogFragment dfg;
     private ArrayList<Item> resultItems;
     private String mItemName = "";
     private String mItemNameLastTime = "";//记录检索框上次输入值，避免同词多次检索消耗DB资源；
+    private boolean curFabsExpansion = false;
+    private final Context thisActivity = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,18 +55,9 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar((Toolbar)findViewById(R.id.m_toolbar));
 
-        mDbHelper  = MyItemsDbHelper.getInstance(getApplicationContext());
-        final TextView tv_item = (TextView)findViewById(R.id.item_total_num) ;
-        final TextView tv_location = (TextView)findViewById(R.id.location_total_num);
-        int i = mDbHelper.getItemTotalNum();//i还要用于判断所以需要保留，不能匿名。
 
-        tv_item.setText(getResources().getString(R.string.current_total_items_num01)
-                +String.valueOf(i)
-                +getResources().getString(R.string.current_total_items_num02));
-        tv_location.setText(getResources().getString(R.string.current_total_locations_num01)
-               +String.valueOf(mDbHelper.getLocationTotalNum())
-               +getResources().getString(R.string.current_total_locations_num02));
-
+        mDbHelper = MyItemsDbHelper.getInstance(getApplicationContext());
+        /*用于调试时加入数据，正常运行可以删除；另，由于取数量已移至onResume，此i出错。
        if(i==0){
            //Log.i(TAG," Inside newly Btn, now items = 0");
            final Button b = (Button)findViewById(R.id.debug_data_import);
@@ -81,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                            +getResources().getString(R.string.current_total_locations_num02));
                }
            });
-       }
+       }*/
 
        //Log.i(TAG," Inside MainActivity, onCreat(); after retrieve itemNumber & Initial Data.");
         final Button button = (Button) findViewById(R.id.search_go_btn);
@@ -106,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                             //Log.i(TAG,"inside MainActivity, resultItems the ArrayList： "+ resultItems.toString());
                             //将检索结果ArrayList<Item>存入新建Fragment的Bundle
                             ItemRecyclerViewFragment resultFragment = new ItemRecyclerViewFragment();
-                            //Log.i(TAG,"inside MainActivity, ItemResultFragment: "+ resultFragment.toString());
+                            //Log.i(TAG,"inside MainActivity, resultItems: "+ resultItems.toString());
                             Bundle args = new Bundle();
                             args.putParcelableArrayList(ITEM_RESULT, resultItems);
                             resultFragment.setArguments(args);
@@ -118,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                             //替换Fragment
                             FragmentTransaction transaction = getFragmentManager().beginTransaction();
                             //Log.i(TAG,"inside MainActivity, after FT: "+ transaction.toString());
+                            //Log.i(TAG,"inside MainActivity, resultItems: "+ resultFragment.getArguments().getParcelableArrayList(ITEM_RESULT).toString());
                             transaction.replace(R.id.item_result, resultFragment, "item_result").commit();
                         } else {
                             if (getFragmentManager().findFragmentByTag("item_result") != null) {
@@ -137,6 +133,129 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final FloatingActionButton mainFab = (FloatingActionButton)findViewById(R.id.main_fab);
+        mainFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(curFabsExpansion == false){
+                    fabsExpansionToggle();
+                    //Toast.makeText(getBaseContext(),"just test the fab click.",Toast.LENGTH_SHORT).show();
+                }else{
+                    Log.i(TAG,"main fab clicked, else-start new ACT branch");
+                    fabsExpansionToggle();
+                    Intent intent = new Intent(getBaseContext(), NewItemActivity.class);
+                    //Log.i(TAG,"main fab clicked, new Intent = "+intent.toString());
+                    startActivity(intent);
+                }
+
+            }
+        });
+
+
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        Log.i(TAG,"INSIDE ONRESUME");
+        mDbHelper  = MyItemsDbHelper.getInstance(getApplicationContext());
+        final TextView tv_item = (TextView)findViewById(R.id.item_total_num) ;
+        final TextView tv_location = (TextView)findViewById(R.id.location_total_num);
+
+        int i = mDbHelper.getItemTotalNum();//i还要用于判断所以需要保留，不能匿名。
+        tv_item.setText(getResources().getString(R.string.current_total_items_num01)
+                +String.valueOf(i)
+                +getResources().getString(R.string.current_total_items_num02));
+        tv_location.setText(getResources().getString(R.string.current_total_locations_num01)
+                +String.valueOf(mDbHelper.getLocationTotalNum())
+                +getResources().getString(R.string.current_total_locations_num02));
+    }
+
+    @Override
+    public void onIdPassOut(long id, ActionType at){
+        dfg.dismiss();
+
+        //ArrayList<Item> items;
+        switch (at){
+            case PURE_SELECT_LOCATION:
+                resultItems = (ArrayList<Item>) mDbHelper.getItemsByLocationId(id);
+                if(resultItems.isEmpty()){
+                    Toast.makeText(thisActivity,"本位置/分类下没有物品",Toast.LENGTH_SHORT).show();
+                }else {
+                    Intent intent = new Intent(this, ShowItemsByLorC.class);
+                    Bundle args = new Bundle();
+                    args.putParcelableArrayList(ShowItemsByLorC.ITEMS,resultItems);
+                    intent.putExtras(args);
+                    //Log.i(TAG,"items, to String: "+resultItems.toString());
+                    startActivity(intent);
+                }
+                break;
+            case PURE_SELECT_CATEGORY:
+                resultItems = (ArrayList<Item>) mDbHelper.getItemsByCategoryId(id);
+                if(resultItems.isEmpty()){
+                    Toast.makeText(thisActivity,"本位置/分类下没有物品",Toast.LENGTH_SHORT).show();
+                }else {
+                    Intent intent = new Intent(this, ShowItemsByLorC.class);
+                    Bundle args = new Bundle();
+                    args.putParcelableArrayList(ShowItemsByLorC.ITEMS,resultItems);
+                    intent.putExtras(args);
+                    //Log.i(TAG,"items, to String: "+resultItems.toString());
+                    startActivity(intent);
+                }
+                break;
+            case MANAGE_LOCATION:
+
+                break;
+            case MANAGE_CATEGORY:
+
+                break;
+            default:
+                Log.e(TAG,"Wrong logic got here...");
+                return;
+        }
+
+    }
+
+    /** Called when the user clicks the loc_fab button */
+    public void toNewLocation(View view) {
+        Log.i(TAG,"loc_fab clicked.");
+        startActivity(new Intent(getBaseContext(), NewLocationActivity.class));
+    }
+
+    /** Called when the user clicks the cat_fab button */
+    public void toNewCategory(View view) {
+        Log.i(TAG,"cat_fab clicked.");
+        startActivity(new Intent(getBaseContext(), NewCategoryActivity.class));
+    }
+
+    /** Called when the user clicks the frame_fab button */
+    public void fabsCollapse(View view) {
+        Log.i(TAG,"FrameLayout(out of fabs) clicked.");
+        fabsExpansionToggle();
+        //startActivity(new Intent(getBaseContext(), NewCategoryActivity.class));
+    }
+
+    void fabsExpansionToggle(){
+        if(curFabsExpansion == false){
+            findViewById(R.id.frame_fab).setVisibility(View.VISIBLE);
+            findViewById(R.id.loc_fab).setVisibility(View.VISIBLE);
+            findViewById(R.id.cat_fab).setVisibility(View.VISIBLE);
+            findViewById(R.id.tv_main_fab).setVisibility(View.VISIBLE);
+            findViewById(R.id.tv_loc_fab).setVisibility(View.VISIBLE);
+            findViewById(R.id.tv_cat_fab).setVisibility(View.VISIBLE);
+            curFabsExpansion = true;
+            Log.i(TAG,"inside fabsExpansionToggle, to Expansion branch,boolean= "+curFabsExpansion );
+        }else{
+            Log.i(TAG,"inside fabsExpansionToggle--else branch,ready to find views." );
+            findViewById(R.id.frame_fab).setVisibility(View.GONE);
+            findViewById(R.id.loc_fab).setVisibility(View.GONE);
+            findViewById(R.id.cat_fab).setVisibility(View.GONE);
+            findViewById(R.id.tv_main_fab).setVisibility(View.GONE);
+            findViewById(R.id.tv_loc_fab).setVisibility(View.GONE);
+            findViewById(R.id.tv_cat_fab).setVisibility(View.GONE);
+            curFabsExpansion = false;
+        }
 
     }
 
@@ -152,18 +271,21 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.item_show_by_loc:
                 Log.i(TAG,"inside onOptionsItemSelected-SW, SHOW BY LOC branch.");
-                showDialog(0,SelectionType.LOCATION_SELECTION);
+                showDialog(0,ActionType.PURE_SELECT_LOCATION);
                 return true;
 
             case R.id.item_show_by_cat:
                 Log.i(TAG,"inside onOptionsItemSelected-SW, SHOW BY CAT branch.");
-                showDialog(0,SelectionType.CATEGORY_SELECTION);
+                showDialog(0,ActionType.PURE_SELECT_CATEGORY);
                 return true;
 
+
             case R.id.loc_manage:
+                showDialog(0,ActionType.MANAGE_LOCATION);
                 return true;
 
             case R.id.cat_manage:
+                showDialog(0,ActionType.MANAGE_CATEGORY);
                 return true;
 
             default:
@@ -280,21 +402,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void showDialog(int superId, SelectionType st){
+    public void showDialog(int superId, ActionType atp){
 
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         Fragment prev = getFragmentManager().findFragmentByTag("selection_dialog");
 
-         if(prev != null){
-             Log.i(TAG, "inside showDialog(), inside if prev!=null branch");
-             ft.remove(prev);
-         }
-         ft.addToBackStack(null);
-         //从option menu的调用都是首层开始选择，所以SuperId=0。
-         //DialogFragment dfg = SelectionDgFragment.newInstance(0,st);
-         DialogFragment dfg = SelectionDgFragment.newInstance(superId,st);
-         //Log.i(TAG, "inside showDialog(), fetched the SelectionDfg instance & passed with 0 and selectionType: "+st.toString());
-         dfg.show(ft, "selection_dialog");
+        if(prev != null){
+            Log.i(TAG, "inside showDialog(), inside if prev!=null branch");
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        //从option menu的调用都是首层开始选择，所以SuperId=0。
+        //DialogFragment dfg = SelectionDgFragment.newInstance(0,st);
+        dfg = SelectionDgFragment.newInstance(superId,atp);
+        //Log.i(TAG, "inside showDialog(), fetched the SelectionDfg instance: "+dfg.toString());
+        dfg.show(ft, "selection_dialog");
     }
 
 }
+
+

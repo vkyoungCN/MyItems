@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="drop_status">
+        <item>（默认）持有</item>
+        <item> 已丢弃</item>
+        <item>准备丢弃</item>
+    </string-array>
+</resources>

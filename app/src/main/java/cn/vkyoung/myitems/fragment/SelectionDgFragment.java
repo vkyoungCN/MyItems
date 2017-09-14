@@ -1,5 +1,6 @@
 package cn.vkyoung.myitems.fragment;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -16,7 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.vkyoung.myitems.R;
-import cn.vkyoung.myitems.assistant.SelectionType;
+import cn.vkyoung.myitems.assistant.ActionType;
+import cn.vkyoung.myitems.assistant.OnSelectionMade;
 import cn.vkyoung.myitems.sqlite.Category;
 import cn.vkyoung.myitems.sqlite.Location;
 import cn.vkyoung.myitems.sqlite.MyItemsDbHelper;
@@ -25,24 +27,37 @@ import cn.vkyoung.myitems.sqlite.MyItemsDbHelper;
  * Created by VkYoung16 on 2017/9/2.
  */
 
-public class SelectionDgFragment extends DialogFragment {
+public class SelectionDgFragment extends DialogFragment implements OnSelectionMade {
     private static final String TAG = "MyItems-SlcFragment";
+    private OnDataPassOut targetActivity;
+    private SelectionDgFragment self = this;
     private List<Location> locations;
     private List<Category> categories;
-    private SelectionType stp;
+    private ActionType atp;
+    private SelectionMode sMode;
     private int superId;
 
     public static List<List<Category>> CatSelectionBackStack = new ArrayList<>();
     public static List<List<Location>> LocSelectionBackStack = new ArrayList<>();
     //private Cat_SelectionAdapter.SelectionOnClickListener mListener;
 
+    public interface OnDataPassOut{
+        public void onIdPassOut(long id, ActionType at);
+    }
+    
+    enum SelectionMode{
+        Location, Category,Undefine
+    }
+    
     //Enum本身已实现了Serializable接口（若再实现Parcelable可能因方法二义性出错）
-    public static SelectionDgFragment newInstance(int superId, SelectionType st){
+    public static SelectionDgFragment newInstance(int superId, ActionType at){
+        Log.i(TAG,"inside newInstance(), before any calls.");
         SelectionDgFragment sdg = new SelectionDgFragment();
+        Log.i(TAG,"inside newInstance(), SelectionDgFragment.");
 
         Bundle args = new Bundle();
         args.putInt("SUPER_ID", superId);
-        args.putSerializable("SELECTION_TYPE", st);
+        args.putSerializable("SELECTION_TYPE", at);
         sdg.setArguments(args);
 
         return sdg;
@@ -51,27 +66,37 @@ public class SelectionDgFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        Log.i(TAG,"inside onCreate(), before any calls.");
+        //Log.i(TAG,"inside onCreate(), before any calls.");
 
         superId = getArguments().getInt("SUPER_ID");//每次调用本Fragment都需要传入SuperId。
-        stp = (SelectionType) getArguments().getSerializable("SELECTION_TYPE");
-        Log.i(TAG,"inside onCreate(), got superId & type form the Bundle,type= "+stp.toString());
+        atp = (ActionType) getArguments().getSerializable("SELECTION_TYPE");
+        
+        //提前判断，避免大量的||运算
+        if(sMode == SelectionMode.Location){
+            sMode = SelectionMode.Location;
+        }else if(atp == ActionType.PURE_SELECT_CATEGORY || atp==ActionType.MANAGE_CATEGORY){
+            sMode = SelectionMode.Category;
+        }else {
+            sMode = SelectionMode.Undefine;
+        }
 
         MyItemsDbHelper mDbHelper = MyItemsDbHelper.getInstance(getActivity().getApplicationContext());
-        if(stp == SelectionType.LOCATION_SELECTION) {
+
+        if(sMode == SelectionMode.Location) {
             locations =  mDbHelper.getLocationsBySuperId(superId);
             LocSelectionBackStack.add(locations);//将获取到的第一组数据加入backStack
             if(!CatSelectionBackStack.isEmpty()) {//loc的检索，应把cat的Bs清空。
                 CatSelectionBackStack.clear();
             }
-            Log.i(TAG, "inside onCreate(), got locations form DB.");
-        }else{
+        }else if(sMode == SelectionMode.Category){
             categories = mDbHelper.getCategoriesBySuperId(0);
             CatSelectionBackStack.add(categories);
             if(!LocSelectionBackStack.isEmpty()){
                 LocSelectionBackStack.clear();
             }
-            Log.i(TAG, "inside onCreate(), got categories form DB.");
+        }else{
+            Log.e(TAG,"Wrong logic (ActionType) got here...");
+            return;
         }
 
     }
@@ -86,36 +111,41 @@ public class SelectionDgFragment extends DialogFragment {
         mRecyclerView.setHasFixedSize(true);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        Log.i(TAG,"inside onCreateView(), ready to set the Adapter.");
-        if(stp == SelectionType.LOCATION_SELECTION) {
-            mRecyclerView.setAdapter(new Loc_SelectionAdapter(locations,getContext()));
-        }else{
-            mRecyclerView.setAdapter(new Cat_SelectionAdapter(categories,getContext()));
-            Log.i(TAG,"inside onCreateView(),cat branch, C_Adapter with Context.");
+        //Log.i(TAG,"inside onCreateView(), ready to set the Adapter.");
+        if(sMode == SelectionMode.Location) {
+            mRecyclerView.setAdapter(new Loc_SelectionAdapter(locations,getContext(),this,atp));
+        }else if (sMode == SelectionMode.Category){
+            mRecyclerView.setAdapter(new Cat_SelectionAdapter(categories,getContext(),this,atp));
+            //Log.i(TAG,"inside onCreateView(),cat branch, C_Adapter with Context.");
         }
 
         ImageView leftArrow = rootView.findViewById(R.id.left_arrow);
+        /*
+        * 点击上一层按钮要有两部分处理：①BS处理；②swap Adapter。
+        * */
         leftArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(stp == SelectionType.LOCATION_SELECTION) {
+                if(sMode == SelectionMode.Location) {
                     //BS中存放的最新数据是和当前显示一致的数据；当后退时，需要先把最近数据移除，
                     //然后将次一的数据加载给新Adapter。
                     if(LocSelectionBackStack.size()>1) {
                         LocSelectionBackStack.remove(LocSelectionBackStack.size()-1);
-                        mRecyclerView.swapAdapter(new Loc_SelectionAdapter(LocSelectionBackStack.get(LocSelectionBackStack.size()-1), getContext()), true);
+                        mRecyclerView.swapAdapter(new Loc_SelectionAdapter(LocSelectionBackStack.get(LocSelectionBackStack.size()-1), getContext(),self,atp), true);
                     }else{
                         Toast.makeText(getContext(),"已经是最上一层了", Toast.LENGTH_SHORT).show();
                     }
-                }else{
+                }else if(sMode == SelectionMode.Category){
                     if(CatSelectionBackStack.size()>1) {
                         CatSelectionBackStack.remove(CatSelectionBackStack.size()-1);
                         Log.i(TAG, "inside onClick(),cat branch, ready to swap Adapter.");
-                        mRecyclerView.swapAdapter(new Cat_SelectionAdapter(CatSelectionBackStack.get(CatSelectionBackStack.size()-1), getContext()),true);
+                        mRecyclerView.swapAdapter(new Cat_SelectionAdapter(CatSelectionBackStack.get(CatSelectionBackStack.size()-1), getContext(),self,atp),true);
                     }else {
                         Toast.makeText(getContext(),"已经是最上一层了", Toast.LENGTH_SHORT).show();
                     }
 
+                }else{
+                    Log.e(TAG,"Wrong logic (ActionType) got here...");
                 }
 
             }
@@ -123,6 +153,18 @@ public class SelectionDgFragment extends DialogFragment {
 
         return rootView;
     }
+
+    @Override
+    public void onAttach(Activity activity){
+        super.onAttach(activity);
+        try {
+            targetActivity = (OnDataPassOut) activity;
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @Override
     public void onCancel(DialogInterface dialog){
         //当用户取消DialogFragment（点击了Back键或Dfg以外区域）时，应当将BackStack清空。
@@ -132,6 +174,16 @@ public class SelectionDgFragment extends DialogFragment {
             CatSelectionBackStack.clear();
     }
 
+    /*
+    * 当Adapter处理onClick事件时，通过其对Fragment的引用，调用Fragment中的本方法，将所选ID传出；
+    * 这里应进一步调用Activity的监听实现，把id进一步传给Activity以供最终使用。
+    * */
+    @Override
+    public void onSingleSelectionMade(long id, ActionType atp){
+        Log.i(TAG,"onSingleSelectionMade called");
+        targetActivity.onIdPassOut(id,atp);
+
+    }
 
 
 

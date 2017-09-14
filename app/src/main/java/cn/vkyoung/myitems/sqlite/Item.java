@@ -17,23 +17,23 @@ public class Item implements Parcelable {
     public static final int ITEM_DROPPED_NO = 0;
     public static final int ITEM_TO_DROP = 2;
 
-
     private int id = 0;
     private String name;
     private String description;
+    private long locationId;
+    private long categoryId;
     private int dropStatus = ITEM_DROPPED_NO;
-    private int locationId;
-    private int categoryId;
     private String mainImage;
 
-    private String locationName;//locationName字段需另行检索转换，不是表内字段
-    private String categoryName;//categoryName字段需另行检索转换，不是表内字段
+    //private String locationName;//locationName字段需另行检索转换，不是表内字段
+    //private String categoryName;//categoryName字段需另行检索转换，不是表内字段
+
     /*
     * 几个构造器
     */
+    //空构造器
     public Item(){
     }
-
     //传入id的构造器可以供系统从DB取回数据时使用
     public Item(int id){
         this.id = id;
@@ -53,14 +53,18 @@ public class Item implements Parcelable {
     /*
     * Parcelable接口所要求覆写的一些内容
     * */
-    private Item mItem;
-
     public int describeContents(){
         return 0;
     }
 
     public void writeToParcel(Parcel out, int flags){
-        out.writeParcelable(mItem, flags);
+        out.writeInt(id);
+        out.writeString(name);
+        out.writeString(description);
+        out.writeLong(locationId);
+        out.writeLong(categoryId);
+        out.writeInt(dropStatus);
+        out.writeString(mainImage);
     }
 
     public static final Parcelable.Creator<Item> CREATOR = new Parcelable.Creator<Item>(){
@@ -74,7 +78,13 @@ public class Item implements Parcelable {
     };
 
     private Item(Parcel in){
-        mItem = in.readParcelable(ClassLoader.getSystemClassLoader());
+        id = in.readInt();
+        name = in.readString();
+        description = in.readString();
+        locationId = in.readLong();
+        categoryId = in.readLong();
+        dropStatus = in.readInt();
+        mainImage = in.readString();
     }
 
 
@@ -95,11 +105,11 @@ public class Item implements Parcelable {
         this.dropStatus = dropStatus;
     }
 
-    public void setLocationId(int locationId){
+    public void setLocationId(long locationId){
         this.locationId = locationId;
     }
 
-    public void setCategoryId(int categoryId){
+    public void setCategoryId(long categoryId){
         this.categoryId = categoryId;
     }
 
@@ -107,13 +117,13 @@ public class Item implements Parcelable {
         this.mainImage = mainImage;
     }
 
-    public void setLocationName(String locationName){
+    /*public void setLocationName(String locationName){
         this.locationName = locationName;
-    }
+    }*/
 
-    public void setCategoryName(String categoryName){
+    /*public void setCategoryName(String categoryName){
         this.categoryName = categoryName;
-    }
+    }*/
 
     /* 暂时保留，待转移到新类中
     public void setExtraImages(String[] extraImages){
@@ -152,12 +162,12 @@ public class Item implements Parcelable {
         return this.mainImage;
     }
 
-    public String getLocationName(){
+    /*public String getLocationName(){
         return this.locationName;
-    }
+    }*/
 
-    public String getCategoryName(){
+    /*public String getCategoryName(){
         return this.categoryName;
-    }
+    }*/
 
 }
