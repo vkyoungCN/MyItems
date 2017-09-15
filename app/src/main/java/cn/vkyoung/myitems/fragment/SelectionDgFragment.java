@@ -2,7 +2,9 @@ package cn.vkyoung.myitems.fragment;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,7 +12,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -35,7 +40,7 @@ public class SelectionDgFragment extends DialogFragment implements OnSelectionMa
     private List<Category> categories;
     private ActionType atp;
     private SelectionMode sMode;
-    private int superId;
+    private long superId;
 
     public static List<List<Category>> CatSelectionBackStack = new ArrayList<>();
     public static List<List<Location>> LocSelectionBackStack = new ArrayList<>();
@@ -48,16 +53,15 @@ public class SelectionDgFragment extends DialogFragment implements OnSelectionMa
     enum SelectionMode{
         Location, Category,Undefine
     }
-    
     //Enum本身已实现了Serializable接口（若再实现Parcelable可能因方法二义性出错）
-    public static SelectionDgFragment newInstance(int superId, ActionType at){
+
+    public static SelectionDgFragment newInstance(long superId, ActionType atp){
         Log.i(TAG,"inside newInstance(), before any calls.");
         SelectionDgFragment sdg = new SelectionDgFragment();
-        Log.i(TAG,"inside newInstance(), SelectionDgFragment.");
 
         Bundle args = new Bundle();
-        args.putInt("SUPER_ID", superId);
-        args.putSerializable("SELECTION_TYPE", at);
+        args.putLong("SUPER_ID", superId);
+        args.putSerializable("SELECTION_TYPE", atp);
         sdg.setArguments(args);
 
         return sdg;
@@ -68,13 +72,13 @@ public class SelectionDgFragment extends DialogFragment implements OnSelectionMa
         super.onCreate(savedInstanceState);
         //Log.i(TAG,"inside onCreate(), before any calls.");
 
-        superId = getArguments().getInt("SUPER_ID");//每次调用本Fragment都需要传入SuperId。
+        superId = getArguments().getLong("SUPER_ID");//每次调用本Fragment都需要传入SuperId。
         atp = (ActionType) getArguments().getSerializable("SELECTION_TYPE");
         
         //提前判断，避免大量的||运算
-        if(sMode == SelectionMode.Location){
+        if(atp == ActionType.PURE_SELECT_LOCATION || atp == ActionType.SHOW_ITEMS_BY_LOCATION || atp==ActionType.MANAGE_LOCATION){
             sMode = SelectionMode.Location;
-        }else if(atp == ActionType.PURE_SELECT_CATEGORY || atp==ActionType.MANAGE_CATEGORY){
+        }else if(atp == ActionType.PURE_SELECT_CATEGORY || atp == ActionType.SHOW_ITEMS_BY_CATEGORY || atp==ActionType.MANAGE_CATEGORY){
             sMode = SelectionMode.Category;
         }else {
             sMode = SelectionMode.Undefine;
@@ -106,6 +110,16 @@ public class SelectionDgFragment extends DialogFragment implements OnSelectionMa
                              Bundle savedInstanceState){
         Log.i(TAG,"inside onCreateView(), before any calls.");
         View rootView = inflater.inflate(R.layout.selection_rv_fragment, container, false);
+
+
+        //通过调整root-VG的大小将dialogFg的宽度设置为90%，高度设为屏幕可用部分的85%。
+        RelativeLayout rlt = rootView.findViewById(R.id.size_selection_fg);
+        WindowManager appWm = (WindowManager) getActivity().getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+        Point point = new Point();
+        appWm.getDefaultDisplay().getSize(point);
+        RelativeLayout.LayoutParams gLp = new RelativeLayout.LayoutParams((int)(point.x*0.9),(int)(point.y*0.85));
+        rlt.setLayoutParams(gLp);
+
 
         final RecyclerView mRecyclerView = rootView.findViewById(R.id.recyclerView_selection);
         mRecyclerView.setHasFixedSize(true);

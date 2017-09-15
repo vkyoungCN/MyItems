@@ -173,12 +173,12 @@ public class MainActivity extends AppCompatActivity implements SelectionDgFragme
     }
 
     @Override
-    public void onIdPassOut(long id, ActionType at){
-        dfg.dismiss();
+    public void onIdPassOut(long id, ActionType atp){
 
         //ArrayList<Item> items;
-        switch (at){
-            case PURE_SELECT_LOCATION:
+        switch (atp){
+            case SHOW_ITEMS_BY_LOCATION:
+                dfg.dismiss();
                 resultItems = (ArrayList<Item>) mDbHelper.getItemsByLocationId(id);
                 if(resultItems.isEmpty()){
                     Toast.makeText(thisActivity,"本位置/分类下没有物品",Toast.LENGTH_SHORT).show();
@@ -191,7 +191,8 @@ public class MainActivity extends AppCompatActivity implements SelectionDgFragme
                     startActivity(intent);
                 }
                 break;
-            case PURE_SELECT_CATEGORY:
+            case SHOW_ITEMS_BY_CATEGORY:
+                dfg.dismiss();
                 resultItems = (ArrayList<Item>) mDbHelper.getItemsByCategoryId(id);
                 if(resultItems.isEmpty()){
                     Toast.makeText(thisActivity,"本位置/分类下没有物品",Toast.LENGTH_SHORT).show();
@@ -205,10 +206,31 @@ public class MainActivity extends AppCompatActivity implements SelectionDgFragme
                 }
                 break;
             case MANAGE_LOCATION:
+                FragmentTransaction locFt = getFragmentManager().beginTransaction();
+                Fragment locPrev = getFragmentManager().findFragmentByTag("L/C_ManageDialog");
+
+                if(locPrev != null){
+                    Log.i(TAG, "inside onIdPassOut(),Manage location branch");
+                    locFt.remove(locPrev);
+                }
+
+                LorC_DetailDialogFragment mDetailDfg_loc = LorC_DetailDialogFragment.newInstance(id,atp);
+                mDetailDfg_loc.setCancelable(false);
+                mDetailDfg_loc.show(locFt, "selection_dialog");
 
                 break;
             case MANAGE_CATEGORY:
+                FragmentTransaction catFt = getFragmentManager().beginTransaction();
+                Fragment catPrev = getFragmentManager().findFragmentByTag("L/C_ManageDialog");
 
+                if(catPrev != null){
+                    Log.i(TAG, "inside onIdPassOut(),Manage location branch");
+                    catFt.remove(catPrev);
+                }
+
+                LorC_DetailDialogFragment mDetailDfg_cat = LorC_DetailDialogFragment.newInstance(id,atp);
+                mDetailDfg_cat.setCancelable(false);
+                mDetailDfg_cat.show(catFt, "selection_dialog");
                 break;
             default:
                 Log.e(TAG,"Wrong logic got here...");
@@ -271,12 +293,12 @@ public class MainActivity extends AppCompatActivity implements SelectionDgFragme
         switch (item.getItemId()){
             case R.id.item_show_by_loc:
                 Log.i(TAG,"inside onOptionsItemSelected-SW, SHOW BY LOC branch.");
-                showDialog(0,ActionType.PURE_SELECT_LOCATION);
+                showDialog(0,ActionType.SHOW_ITEMS_BY_LOCATION);
                 return true;
 
             case R.id.item_show_by_cat:
                 Log.i(TAG,"inside onOptionsItemSelected-SW, SHOW BY CAT branch.");
-                showDialog(0,ActionType.PURE_SELECT_CATEGORY);
+                showDialog(0,ActionType.SHOW_ITEMS_BY_CATEGORY);
                 return true;
 
 

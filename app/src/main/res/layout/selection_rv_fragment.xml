@@ -3,6 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <RelativeLayout
+        android:id="@+id/size_selection_fg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
     <LinearLayout
         android:id="@+id/back_to_upper"
         android:layout_width="wrap_content"
@@ -13,13 +17,13 @@
             android:id="@+id/left_arrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_keyboard_arrow_left_black_48dp"/>
+            android:src="@drawable/ic_arrow_upward_black_36dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center"
             android:textSize="16sp"
-            android:text="返回上一层"
+            android:text="请选择项目"
             />
 
     </LinearLayout>
@@ -31,5 +35,5 @@
         android:layout_width="match_parent"
         android:layout_below="@id/back_to_upper"
         />
-
+    </RelativeLayout>
 </RelativeLayout>

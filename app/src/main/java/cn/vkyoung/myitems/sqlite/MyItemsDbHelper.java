@@ -438,6 +438,28 @@ public class MyItemsDbHelper extends SQLiteOpenHelper {
     }
 
     /*
+    * 依据id获取单条Location记录
+    * */
+    public Location getLocationById(long locationId){
+        Location location = new Location();
+        String selectQuery = "SELECT * FROM "+ MyItemsContract.Locations.TABLE_NAME+" WHERE "
+                +MyItemsContract.Locations._ID+" = "+ locationId;
+
+        getWDbIfClosedOrNull();
+        Cursor cursor = mSQLiteDatabase.rawQuery(selectQuery, null);
+        if(cursor.moveToFirst()){
+            location.setId(cursor.getLong(cursor.getColumnIndex(MyItemsContract.Locations._ID)));
+            location.setName(cursor.getString(cursor.getColumnIndex(MyItemsContract.Locations.COLUMN_LOC_NAME)));
+            location.setName(cursor.getString(cursor.getColumnIndex(MyItemsContract.Locations.COLUMN_LOC_DESCRIPTION)));
+            location.setId(cursor.getLong(cursor.getColumnIndex(MyItemsContract.Locations.COLUMN_SUPER_LOCATION_ID)));
+        }
+        cursor.close();
+        closeDB();
+
+        return location;
+    }
+
+    /*
     * 从location表检索全部位置
     * */
     public List<Location> getAllLocations(){
@@ -518,6 +540,28 @@ public class MyItemsDbHelper extends SQLiteOpenHelper {
         closeDB();
         return result;
 
+    }
+
+    /*
+    * 依据id获取单条Category记录
+    * */
+    public Category getCategoryById(long categoryId){
+        Category category = new Category();
+        String selectQuery = "SELECT * FROM "+ MyItemsContract.Categories.TABLE_NAME+" WHERE "
+                +MyItemsContract.Categories._ID+" = "+ categoryId;
+
+        getWDbIfClosedOrNull();
+        Cursor cursor = mSQLiteDatabase.rawQuery(selectQuery, null);
+        if(cursor.moveToFirst()){
+            category.setId(cursor.getLong(cursor.getColumnIndex(MyItemsContract.Categories._ID)));
+            category.setName(cursor.getString(cursor.getColumnIndex(MyItemsContract.Categories.COLUMN_CAT_NAME)));
+            category.setName(cursor.getString(cursor.getColumnIndex(MyItemsContract.Categories.COLUMN_CAT_DESCRIPTION)));
+            category.setId(cursor.getLong(cursor.getColumnIndex(MyItemsContract.Categories.COLUMN_SUPER_CAT_ID)));
+        }
+        cursor.close();
+        closeDB();
+
+        return category;
     }
 
     /*

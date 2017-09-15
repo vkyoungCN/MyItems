@@ -105,6 +105,7 @@ public class Cat_SelectionAdapter extends RecyclerView.Adapter<Cat_SelectionAdap
         //Log.i(TAG,"inside onBindViewHolder, ready to set the Listener");
         if(myItemsDbHelper.hasChildCategory(category.getId())) {
             viewHolder.getNextLevel().setOnClickListener(this);
+            viewHolder.getNextLevel().setVisibility(View.VISIBLE);
             Log.i(TAG, "inside onBindViewHolder, the Listener has been set");
         }else {
             viewHolder.getNextLevel().setVisibility(View.GONE);

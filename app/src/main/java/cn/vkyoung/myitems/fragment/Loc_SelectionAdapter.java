@@ -108,6 +108,7 @@ public class Loc_SelectionAdapter extends RecyclerView.Adapter<Loc_SelectionAdap
         if(myItemsDbHelper.hasChildLocation(location.getId())) {
             viewHolder.getNextLevel().setOnClickListener(this);
             Log.i(TAG, "inside onBindViewHolder, the Listener has been set");
+            viewHolder.getNextLevel().setVisibility(View.VISIBLE);
         }else {
             viewHolder.getNextLevel().setVisibility(View.GONE);
         }
