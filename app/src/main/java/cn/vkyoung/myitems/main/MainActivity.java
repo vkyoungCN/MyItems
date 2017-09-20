@@ -27,12 +27,14 @@ import java.util.ArrayList;
 
 import cn.vkyoung.myitems.assistant.ActionType;
 import cn.vkyoung.myitems.assistant.ForgiveSize;
+import cn.vkyoung.myitems.fragment.CategoryDialogFragment;
 import cn.vkyoung.myitems.fragment.ItemRecyclerViewFragment;
+import cn.vkyoung.myitems.fragment.LocationDialogFragment;
 import cn.vkyoung.myitems.fragment.SelectionDgFragment;
 import cn.vkyoung.myitems.sqlite.Item;
 import cn.vkyoung.myitems.sqlite.MyItemsDbHelper;
 
-public class MainActivity extends AppCompatActivity implements SelectionDgFragment.OnDataPassOut {
+public class MainActivity extends AppCompatActivity implements SelectionDgFragment.OnDataPassOut,LocationDialogFragment.OnLocationDataChanged,CategoryDialogFragment.OnCategoryDataChanged {
 
     private static final String TAG = "MyItems-MainActivity";
     private static final String ITEM_RESULT = "item_search_result";
@@ -207,36 +209,70 @@ public class MainActivity extends AppCompatActivity implements SelectionDgFragme
                 break;
             case MANAGE_LOCATION:
                 FragmentTransaction locFt = getFragmentManager().beginTransaction();
-                Fragment locPrev = getFragmentManager().findFragmentByTag("L/C_ManageDialog");
+                Fragment locPrev = getFragmentManager().findFragmentByTag("LC_ManageDialog");
 
                 if(locPrev != null){
                     Log.i(TAG, "inside onIdPassOut(),Manage location branch");
                     locFt.remove(locPrev);
                 }
 
-                LorC_DetailDialogFragment mDetailDfg_loc = LorC_DetailDialogFragment.newInstance(id,atp);
-                mDetailDfg_loc.setCancelable(false);
-                mDetailDfg_loc.show(locFt, "selection_dialog");
+                LocationDialogFragment mLocationDfg = LocationDialogFragment.newInstance(id,atp);
+                mLocationDfg.setCancelable(false);
+                mLocationDfg.show(locFt, "LC_ManageDialog");
 
                 break;
             case MANAGE_CATEGORY:
                 FragmentTransaction catFt = getFragmentManager().beginTransaction();
-                Fragment catPrev = getFragmentManager().findFragmentByTag("L/C_ManageDialog");
+                Fragment catPrev = getFragmentManager().findFragmentByTag("LC_ManageDialog");
 
                 if(catPrev != null){
                     Log.i(TAG, "inside onIdPassOut(),Manage location branch");
                     catFt.remove(catPrev);
                 }
 
-                LorC_DetailDialogFragment mDetailDfg_cat = LorC_DetailDialogFragment.newInstance(id,atp);
-                mDetailDfg_cat.setCancelable(false);
-                mDetailDfg_cat.show(catFt, "selection_dialog");
+               CategoryDialogFragment mCategoryDfg = CategoryDialogFragment.newInstance(id,atp);
+                mCategoryDfg.setCancelable(false);
+                mCategoryDfg.show(catFt, "LC_ManageDialog");
+                break;
+            case PURE_SELECT_LOCATION:
+                Log.e(TAG,"PURE_SELECT_LOCATION");
+                SelectionDgFragment locationSlcDialogFragment = (SelectionDgFragment) getFragmentManager().findFragmentByTag("LC_MagSlcDialog");
+                //Log.e(TAG,"Got locSelectionDfg: "+locationSlcDialogFragment.toString());
+                locationSlcDialogFragment.dismiss();
+                LocationDialogFragment locationDialogFragment = (LocationDialogFragment) getFragmentManager().findFragmentByTag("LC_ManageDialog");
+                //Log.e(TAG,"Got locDfg: "+locationDialogFragment.toString());
+                locationDialogFragment.onIdPassOut(id, atp);
+                break;
+            case PURE_SELECT_CATEGORY:
+                Log.e(TAG,"PURE_SELECT_CATEGORY");
+                SelectionDgFragment categorySlcDialogFragment = (SelectionDgFragment) getFragmentManager().findFragmentByTag("LC_MagSlcDialog");
+                categorySlcDialogFragment.dismiss();
+                CategoryDialogFragment categoryDialogFragment = (CategoryDialogFragment) getFragmentManager().findFragmentByTag("LC_ManageDialog");
+                categoryDialogFragment.onIdPassOut(id, atp);
                 break;
             default:
                 Log.e(TAG,"Wrong logic got here...");
                 return;
         }
 
+    }
+
+
+
+    @Override
+    public void onLocationDataChanged(boolean isChanged){
+        LocationDialogFragment locationDialogFragment = (LocationDialogFragment) getFragmentManager().findFragmentByTag("LC_ManageDialog");
+        locationDialogFragment.dismiss();
+        SelectionDgFragment slcFg = (SelectionDgFragment)getFragmentManager().findFragmentByTag("selection_dialog");
+        slcFg.resetAdapterData();
+    }
+
+    @Override
+    public void onCategoryDataChanged(boolean isChanged){
+        CategoryDialogFragment categoryDialogFragment = (CategoryDialogFragment) getFragmentManager().findFragmentByTag("LC_ManageDialog");
+        categoryDialogFragment.dismiss();
+        SelectionDgFragment slcFg = (SelectionDgFragment)getFragmentManager().findFragmentByTag("selection_dialog");
+        slcFg.resetAdapterData();
     }
 
     /** Called when the user clicks the loc_fab button */
@@ -440,6 +476,8 @@ public class MainActivity extends AppCompatActivity implements SelectionDgFragme
         //Log.i(TAG, "inside showDialog(), fetched the SelectionDfg instance: "+dfg.toString());
         dfg.show(ft, "selection_dialog");
     }
+
+
 
 }
 

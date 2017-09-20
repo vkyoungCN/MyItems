@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"    >
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/sizeSettingLt"
+        android:id="@+id/sizeSettingLt_locdfg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -13,7 +13,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_marginTop="8dp">
             <TextView
                 android:layout_width="wrap_content"
@@ -21,16 +21,17 @@
                 android:text="@string/LorC_name"
                 android:textSize="20sp"
                 android:gravity="center"
+                android:layout_margin="4dp"
                 />
             <EditText
-                android:id="@+id/ed_LorC_name"
+                android:id="@+id/ed_loc_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lines="1"
                 android:visibility="gone"
                 />
             <TextView
-                android:id="@+id/tv_LorC_name"
+                android:id="@+id/tv_loc_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lines="1"
@@ -41,7 +42,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_marginTop="8dp">
             <TextView
                 android:layout_width="wrap_content"
@@ -49,16 +50,17 @@
                 android:text="@string/LorC_description"
                 android:textSize="20sp"
                 android:gravity="center"
+                android:layout_margin="4dp"
                 />
             <EditText
-                android:id="@+id/ed_LorC_description"
+                android:id="@+id/ed_loc_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lines="1"
                 android:visibility="gone"
                 />
             <TextView
-                android:id="@+id/tv_LorC_description"
+                android:id="@+id/tv_loc_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lines="1"
@@ -69,7 +71,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal">
             <LinearLayout
                 android:id="@+id/loc_deg_lay_locdfg"
@@ -77,12 +79,13 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:onClick="selectLocation">
+                android:clickable="false"
+                >
                 <ImageView
                     android:id="@+id/iv_deg_loc_locdfg"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
+                    android:layout_gravity="center"
                     android:src="@drawable/ic_edit_location_black_24dp"
                     android:scaleType="center"/>
                 <TextView
@@ -91,39 +94,14 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/loc_no_designate"
+                    android:text="@string/top_node"
                     android:lines="2"
                     android:maxLines="2"
                     />
 
 
             </LinearLayout>
-            <LinearLayout
-                android:id="@+id/cat_deg_lay_locdfg"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:onClick="selectCategory">
 
-                <ImageView
-                    android:id="@+id/iv_deg_cat_locdfg"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:src="@drawable/ic_class_black_24dp"
-                    android:scaleType="center"/>
-                <TextView
-                    android:id="@+id/cat_deg_tv_locdfg"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:layout_gravity="center_horizontal"
-                    android:text="@string/cat_no_designate"
-                    android:lines="2"
-                    android:maxLines="2"/>
-
-            </LinearLayout>
         </LinearLayout>
 
         <TextView
@@ -142,13 +120,14 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:onClick="backToMain">
+                >
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:src="@drawable/ic_keyboard_backspace_black_36dp"
-                    android:scaleType="center"/>
+                    android:scaleType="center"
+                    />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -164,7 +143,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:onClick="editLorC">
+                >
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -188,7 +167,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:onClick="deleteLorC">
+                >
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -205,10 +184,86 @@
                     android:textSize="18sp"/>
 
             </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/confirmChange_locdfg"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#ccff90"
+                android:visibility="gone"
+                >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:src="@drawable/ic_check_black_36dp"
+                    android:scaleType="center"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:layout_gravity="center_horizontal"
+                    android:text="确认修改"
+                    android:textSize="18sp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="#1565c0"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/confirmDelete_lay_locdfg"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#ffca28"
+                android:visibility="gone" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:src="@drawable/ic_delete_black_36dp"
+                    android:scaleType="center"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:layout_gravity="center_horizontal"
+                    android:text="请确认需要删除"
+                    android:textSize="18sp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="#DD2C00"/>
+
+            </LinearLayout>
+
+
         </LinearLayout>
 
 
 
     </LinearLayout>
-
-</FrameLayout>
+</LinearLayout>
